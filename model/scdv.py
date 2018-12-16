@@ -52,6 +52,14 @@ class SCDV(object):
 
         self._sparse_threshold = self._build_sparsity_threshold(document_vectors, sparsity_percentage)
 
+    @property
+    def dictionary(self) -> Dictionary:
+        return self._dictionary
+
+    @property
+    def word_cluster_probabilities(self) -> np.ndarray:
+        return self._word_cluster_probabilities
+
     def infer_vector(self, new_documents: List[List[str]], l2_normalize: bool = True) -> np.ndarray:
         word_cluster_vectors = self._build_word_cluster_vectors(self._word_embeddings, self._word_cluster_probabilities)
         word_topic_vectors = self._build_word_topic_vectors(self._idf, word_cluster_vectors)
@@ -71,7 +79,7 @@ class SCDV(object):
         embeddings = np.zeros((len(dictionary.token2id), w2v.vector_size))
         for token, idx in dictionary.token2id.items():
             embeddings[idx] = w2v.wv[token]
-        return embeddings
+        return sklearn.preprocessing.normalize(embeddings, axis=1, norm='l2')
 
     @staticmethod
     def _build_word_cluster_probabilities(word_embeddings: np.ndarray, cluster_size: int,
